@@ -1,45 +1,85 @@
-* {
-    box-sizing: border-box;
-}
+const questions = [
+  {
+    question: "What is the purpose of Principal Component Analysis (PCA)?",
+    options: ["Data classification", "Dimensionality reduction", "Regression analysis", "Clustering"],
+    answer: "Dimensionality reduction"
+  },
+  {
+    question: "Which model is used to predict a binary outcome?",
+    options: ["Linear Regression", "Logistic Regression", "K-Means", "Decision Tree"],
+    answer: "Logistic Regression"
+  },
+  {
+    question: "What is overfitting in machine learning?",
+    options: ["Model performs well on training data but poorly on test data", 
+              "Model performs well on test data but poorly on training data", 
+              "Model performs equally on both datasets", 
+              "Model is too simple"],
+    answer: "Model performs well on training data but poorly on test data"
+  },
+  {
+    question: "What is a confusion matrix used for?",
+    options: ["To measure accuracy", "To calculate precision", "To calculate error rate", "To evaluate classification performance"],
+    answer: "To evaluate classification performance"
+  }
+];
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 20px;
-}
+let selectedAnswers = {};
+const container = document.getElementById('question-container');
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+questions.forEach((q, index) => {
+  const questionElement = document.createElement('div');
+  questionElement.classList.add('question-container');
+  questionElement.innerHTML = `<p>${index + 1}. ${q.question}</p>`;
+  q.options.forEach(option => {
+    questionElement.innerHTML += `
+      <label>
+        <input type="radio" name="q${index}" value="${option}">
+        ${option}
+      </label><br>`;
+  });
+  container.appendChild(questionElement);
+});
 
-h1 {
-    text-align: center;
-    color: #333;
-}
+function handleSubmit() {
+  questions.forEach((q, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    if (selected) {
+      selectedAnswers[`Question ${index + 1}`] = selected.value;
+    }
+  });
 
-.question-container {
-    margin-bottom: 20px;
-}
+  const email = document.getElementById('email').value;
 
-button {
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
+  // Create the email message
+  const message = `
+    Email: ${email}\n
+    Answers:\n
+    ${JSON.stringify(selectedAnswers, null, 2)}\n
+  `;
 
-button:hover {
-    background-color: #0056b3;
-}
+  // Use Formspree or EmailJS to send the data
+  fetch("https://formspree.io/f/xzzpnbrl)", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      message: message
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      document.getElementById('result').innerText = 'Your test has been submitted. We will notify you if selected.';
+    } else {
+      document.getElementById('result').innerText = 'There was an error submitting your test.';
+    }
+  })
+  .catch(error => {
+    document.getElementById('result').innerText = 'There was an error submitting your test.';
+  });
 
-#result {
-    margin-top: 20px;
-    font-size: 18px;
+  // Prevent form submission
+  return false;
 }
